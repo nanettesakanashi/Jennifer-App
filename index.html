@@ -110,7 +110,7 @@
             <div id="statusMessage" class="text-center text-red-500 font-medium h-5"></div>
             <button id="recordButton" class="btn-primary flex items-center justify-center w-full md:w-auto">
                 <svg id="mic-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3> 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                 </svg>
                 <span id="recordButtonText">Start Conversation</span>
             </button>
@@ -167,6 +167,11 @@
                     });
             });
         }
+        
+        // --- API KEY ---
+        // PASTE YOUR GOOGLE AI STUDIO API KEY IN THE QUOTES BELOW
+        const apiKey = "AIzaSyBuFanFrZ75JUQeTPAdR2OfgiKppNRAHl4";
+
 
         const recordButton = document.getElementById('recordButton');
         const recordButtonText = document.getElementById('recordButtonText');
@@ -188,25 +193,15 @@
         // Check for browser support
         if ('webkitSpeechRecognition' in window) {
             recognition = new webkitSpeechRecognition();
-            recognition.continuous = false; // Important: Process speech after a pause
+            recognition.continuous = false; // Process speech after a pause
             recognition.interimResults = false; // We only need the final result
             recognition.lang = 'en-US';
 
             recognition.onstart = () => {
                 recordingStatus.classList.remove('hidden');
             };
-
-            recognition.onend = () => {
-                recordingStatus.classList.add('hidden');
-            };
             
             recognition.onresult = (event) => {
-                if (currentSpeech) {
-                    currentSpeech.pause(); 
-                }
-                
-                recognition.stop(); 
-                
                 const transcript = event.results[event.results.length - 1][0].transcript.trim();
 
                 if (transcript) {
@@ -220,21 +215,23 @@
                     
                     conversationHistory.push({ role: "user", parts: [{ text: transcript }] });
 
-                    // Always treat speech as part of the ongoing conversation
                     getAIAssistance("Respond conversationally, continuing the thread. Keep it brief.", false);
-
-                } else {
-                    if (sessionActive) {
-                        try { recognition.start(); } catch(e) {}
-                    }
                 }
+            };
+
+            recognition.onend = () => {
+                recordingStatus.classList.add('hidden');
+                // The loop is now handled by the TTS onended event, so we don't restart here
             };
 
             recognition.onerror = (event) => {
                 console.error("Speech recognition error:", event.error);
                 if (event.error === 'not-allowed') {
-                    statusMessage.textContent = 'Microphone access was denied. Please allow it in your browser settings.';
+                    statusMessage.textContent = 'Microphone access was denied.';
                 } else if (event.error !== 'no-speech') {
+                     statusMessage.textContent = 'Sorry, I\'m having trouble hearing.';
+                     setTimeout(() => statusMessage.textContent = '', 4000);
+                } else if (event.error === 'no-speech') {
                      console.log("No speech detected, waiting for user to speak.");
                 }
             };
@@ -255,9 +252,8 @@
                 recordButtonText.textContent = 'Start Conversation';
                 recordingStatus.classList.add('hidden');
 
-                // Generate/update the to-do list from the full conversation history
                 if (conversationHistory.length > 0) {
-                    getAIAssistance("Analyze the entire conversation and extract all action items. Format them as a markdown to-do list. The output must *only* contain the list items, starting each with a hyphen.", true);
+                    getAIAssistance("Based on our entire conversation, generate a comprehensive and updated to-do list.", true);
                 }
 
             } else {
@@ -269,8 +265,6 @@
                     window.audioCtx.resume();
                 }
 
-                // If this is the very first time the button is clicked, clear placeholder text.
-                // On subsequent starts, the conversation continues from where it left off.
                 if (conversationHistory.length === 0) {
                     conversationDiv.innerHTML = '';
                     aiNotesDiv.innerHTML = '';
@@ -290,10 +284,8 @@
                 return;
             }
 
-            // Format the list for plain text pasting
             const textToCopy = todoItems.map(item => `• ${item.textContent}`).join('\n');
 
-            // Use a temporary textarea to perform the copy command
             const textArea = document.createElement('textarea');
             textArea.value = textToCopy;
             document.body.appendChild(textArea);
@@ -328,6 +320,7 @@
             const dataSize = pcmData.length * 2;
             const buffer = new ArrayBuffer(44 + dataSize);
             const view = new DataView(buffer);
+
             view.setUint32(0, 0x52494646, false);
             view.setUint32(4, 36 + dataSize, true);
             view.setUint32(8, 0x57415645, false);
@@ -341,9 +334,11 @@
             view.setUint16(34, bitsPerSample, true);
             view.setUint32(36, 0x64617461, false);
             view.setUint32(40, dataSize, true);
+
             for (let i = 0; i < pcmData.length; i++) {
                 view.setInt16(44 + i * 2, pcmData[i], true);
             }
+
             return new Blob([view], { type: 'audio/wav' });
         }
 
@@ -369,7 +364,6 @@
         function getAndPlayTTS(text) {
              return new Promise((resolve, reject) => {
                 const cleanedText = text.replace(/[*_`]/g, '');
-                const apiKey = "";
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
 
                 const payload = {
@@ -406,23 +400,26 @@
                         const audioUrl = URL.createObjectURL(wavBlob);
                         
                         currentSpeech = new Audio(audioUrl);
-                        currentSpeech.playbackRate = 1.15; // Play 15% faster
                         currentSpeech.onended = () => {
                             currentSpeech = null;
+                            if (sessionActive) {
+                                recognition.start(); // Start listening ONLY after TTS is done
+                            }
                             resolve();
                         };
-                        currentSpeech.onerror = (err) => {
-                             currentSpeech = null;
-                             reject(err);
-                        }
-                        currentSpeech.play();
+                        currentSpeech.play().catch(e => reject(e));
                     } else {
-                        throw new Error("Audio data not found in API response.");
+                        throw new Error("Invalid audio data in TTS response.");
                     }
                 })
                 .catch(error => {
-                    console.error("Error generating or playing TTS audio:", error);
-                    statusMessage.textContent = "Sorry, I couldn't generate a voice response.";
+                    console.error("Error with TTS:", error);
+                    statusMessage.textContent = "Sorry, I'm having trouble responding.";
+                    setTimeout(() => statusMessage.textContent = '', 4000);
+                    // If TTS fails, we must still restart the loop if active
+                    if (sessionActive) {
+                       recognition.start();
+                    }
                     reject(error);
                 });
             });
@@ -437,22 +434,18 @@
             let contentForAPI = [...conversationHistory];
             contentForAPI.push({ role: "user", parts: [{ text: prompt }] });
             
-            const apiKey = ""; 
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
-            const payload = {
-                contents: contentForAPI,
-                systemInstruction: { parts: [{ text: systemPrompt }] },
-            };
             
             try {
                 const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({ contents: contentForAPI, systemInstruction: { parts: [{ text: systemPrompt }] } })
                 });
 
-                if (!response.ok) throw new Error(`API call failed with status: ${response.status}`);
+                if (!response.ok) {
+                    throw new Error(`API call failed with status: ${response.status}`);
+                }
 
                 const result = await response.json();
                 const candidate = result.candidates?.[0];
@@ -466,7 +459,6 @@
                         const htmlList = markdownListToHtml(text);
                         todoListDiv.innerHTML = htmlList; 
                         copyToDoListButton.classList.remove('hidden');
-                        // The AI's written response `text` is ONLY the list. We speak a separate confirmation.
                         await getAndPlayTTS("Got it. I've updated your to-do list for you.");
                     } else {
                         if (aiNotesDiv.querySelector('.text-gray-400')) {
@@ -479,22 +471,17 @@
                 } else {
                     throw new Error("Invalid response structure from API.");
                 }
+
             } catch (error) {
-                console.error("Error with AI Assistance:", error);
+                console.error("Error calling Gemini API:", error);
                 statusMessage.textContent = "Sorry, I'm having trouble responding.";
-                // In case of error, ensure we can start listening again if the session is active
-                if (sessionActive) {
-                    try { recognition.start(); } catch(e) {}
+                setTimeout(() => statusMessage.textContent = '', 4000);
+                 if (sessionActive) {
+                    recognition.start(); // Restart loop even on error
                 }
             } finally {
                 aiLoading.classList.add('hidden');
                 recordButton.disabled = false;
-                // Important: Only restart listening if the session is still active
-                if (sessionActive) {
-                    try { recognition.start(); } catch(e) {
-                         console.error("Could not restart recognition in finally block:", e);
-                    }
-                }
             }
         }
     </script>
