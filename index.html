@@ -171,7 +171,7 @@
         
         // --- API KEY ---
         // PASTE YOUR GOOGLE AI STUDIO API KEY IN THE QUOTES BELOW
-        const apiKey = "AIzaSyA8mG1Xdcod9kg7lgUTHfT84_XogkmPZfQ";
+        const apiKey = "PASTE_YOUR_KEY_HERE";
 
 
         const recordButton = document.getElementById('recordButton');
@@ -190,6 +190,7 @@
         let recognition;
         let conversationHistory = [];
         let currentSpeech = null; // To hold the current TTS audio object
+        let audioCtx; // To hold the audio context
         
         // Check for browser support
         if ('webkitSpeechRecognition' in window) {
@@ -266,8 +267,13 @@
                 sessionActive = true;
                 recordButtonText.textContent = 'End Conversation';
                 
-                if (window.AudioContext && window.audioCtx && window.audioCtx.state === 'suspended') {
-                    window.audioCtx.resume();
+                // --- FIX FOR MOBILE AUDIO ---
+                // Initialize and resume the AudioContext on the first user tap.
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
                 }
 
                 if (conversationHistory.length === 0) {
@@ -492,4 +498,5 @@
     </script>
 </body>
 </html>
+
 
