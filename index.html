@@ -6,28 +6,36 @@
     <title>AI Voice Assistant</title>
     
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#4f46e5"/>
+    <meta name="theme-color" content="#DDA7A2"/>
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="https://placehold.co/192x192/4f46e5/ffffff?text=AI">
+    <link rel="apple-touch-icon" href="https://placehold.co/192x192/DDA7A2/ffffff?text=AI">
 
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn-tailwindcss.vercel.app/"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* West Coast Modern Aesthetic */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
+            background-color: #F8F5F2; /* Warm, off-white background */
         }
         .assistant-card {
-            background-color: white;
+            background-color: #FFFFFF;
             border-radius: 0.75rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border: 1px solid #EAEAEA;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04); /* Softer, more subtle shadow */
             transition: all 0.3s ease-in-out;
         }
         .assistant-card:hover {
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06);
+        }
+        h1, h2 {
+            color: #2D2D2D; /* Softer black for headings */
+        }
+        p, .text-gray-600 {
+            color: #555555; /* Dark grey for body text */
         }
         .btn-primary {
-            background-color: #4f46e5;
+            background-color: #DDA7A2; /* Dusty Pink */
             color: white;
             font-weight: 600;
             padding: 0.75rem 1.5rem;
@@ -37,15 +45,15 @@
             transition: background-color 0.3s ease;
         }
         .btn-primary:hover {
-            background-color: #4338ca;
+            background-color: #C9948F; /* Darker Dusty Pink */
         }
          .btn-primary:disabled {
-            background-color: #a5b4fc;
+            background-color: #E8C3BF; /* Lighter, muted pink */
             cursor: not-allowed;
         }
         .loader {
             border: 4px solid #f3f3f3;
-            border-top: 4px solid #4f46e5;
+            border-top: 4px solid #DDA7A2; /* Dusty Pink spinner */
             border-radius: 50%;
             width: 24px;
             height: 24px;
@@ -60,8 +68,8 @@
             width: 10px;
             height: 10px;
             border-radius: 5px;
-            background-color: #4f46e5;
-            color: #4f46e5;
+            background-color: #DDA7A2;
+            color: #DDA7A2;
             animation: dotFlashing 1s infinite linear alternate;
             animation-delay: .5s;
             display: inline-block;
@@ -75,8 +83,8 @@
             width: 10px;
             height: 10px;
             border-radius: 5px;
-            background-color: #4f46e5;
-            color: #4f46e5;
+            background-color: #DDA7A2;
+            color: #DDA7A2;
             animation: dotFlashing 1s infinite alternate;
         }
         .dot-flashing::before {
@@ -88,22 +96,24 @@
             animation-delay: 1s;
         }
         @keyframes dotFlashing {
-            0% {
-                background-color: #4f46e5;
-            }
-            50%,
-            100% {
-                background-color: #c7d2fe;
-            }
+            0% { background-color: #DDA7A2; }
+            50%, 100% { background-color: #E8C3BF; }
+        }
+        .form-container {
+            border-color: #ECECEC;
+            background-color: #FAFAFA;
+        }
+        .h2-border {
+             border-color: #ECECEC;
         }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
 
-    <div class="assistant-card w-full max-w-2xl p-6 md-p-8 space-y-6">
+    <div class="assistant-card w-full max-w-2xl p-6 md:p-8 space-y-6">
         <div>
-            <h1 class="text-3xl font-bold text-gray-900 text-center">Jennifer, Your AI Co-Pilot</h1>
-            <p class="text-gray-600 text-center mt-2">Start talking to Jennifer. She's ready to listen.</p>
+            <h1 class="text-3xl font-bold text-center">Jennifer, Your AI Co-Pilot</h1>
+            <p class="text-center mt-2">Start talking to Jennifer. She's ready to listen.</p>
         </div>
 
         <div class="flex flex-col items-center space-y-4">
@@ -114,36 +124,33 @@
                 </svg>
                 <span id="recordButtonText">Start Conversation</span>
             </button>
-            <div id="recording-status" class="text-sm text-gray-500 hidden">
-                Listening... <div class="dot-flashing"></div>
+            <div id="recording-status" class="text-sm hidden items-center justify-center">
+                <div class="dot-flashing"></div>
+                <span id="recording-status-text" class="ml-2">Listening...</span>
             </div>
         </div>
 
         <!-- Conversation Log -->
         <div id="conversation-container" class="space-y-4">
-             <h2 class="text-xl font-semibold text-gray-800 border-b pb-2">Conversation</h2>
-             <div id="conversation" class="h-48 overflow-y-auto p-4 bg-gray-50 rounded-lg border">
+             <h2 class="text-xl font-semibold border-b pb-2 h2-border">Conversation</h2>
+             <div id="conversation" class="h-48 overflow-y-auto p-4 rounded-lg border form-container">
                 <p class="text-gray-400">Your conversation will appear here...</p>
             </div>
         </div>
 
         <!-- AI Assistant Notes -->
          <div id="ai-notes-container" class="space-y-4">
-             <h2 class="text-xl font-semibold text-gray-800 border-b pb-2">Jennifer's Follow-up</h2>
-             <div id="aiNotes" class="h-32 overflow-y-auto p-4 bg-gray-50 rounded-lg border">
+             <h2 class="text-xl font-semibold border-b pb-2 h2-border">Jennifer's Follow-up</h2>
+             <div id="aiNotes" class="h-32 overflow-y-auto p-4 rounded-lg border form-container">
                  <p class="text-gray-400">Jennifer's questions will appear here...</p>
-             </div>
-             <div id="ai-loading" class="hidden flex items-center justify-center">
-                <div class="loader"></div>
-                <p class="ml-2 text-gray-600">Assistant is thinking...</p>
              </div>
         </div>
 
 
         <!-- To-Do List -->
         <div id="todo-container" class="space-y-4">
-            <h2 class="text-xl font-semibold text-gray-800 border-b pb-2">To-Do List</h2>
-            <div id="todoList" class="p-4 bg-gray-50 rounded-lg border">
+            <h2 class="text-xl font-semibold border-b pb-2 h2-border">To-Do List</h2>
+            <div id="todoList" class="p-4 rounded-lg border form-container">
                 <p class="text-gray-400">Your to-do list will appear here after the conversation.</p>
             </div>
             <div class="text-center">
@@ -155,187 +162,317 @@
     </div>
 
     <script>
-        // PWA Service Worker Registration
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                // Use a relative path for the service worker
-                navigator.serviceWorker.register('sw.js')
-                    .then(registration => {
-                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                    })
-                    .catch(error => {
-                        console.log('ServiceWorker registration failed: ', error);
-                    });
-            });
-        }
-        
-        // --- API KEY ---
-        // PASTE YOUR GOOGLE AI STUDIO API KEY IN THE QUOTES BELOW
-        const apiKey = "PASTE_YOUR_KEY_HERE";
+        // --- CONFIG ---
+        const apiKey = "AIzaSyA8mG1Xdcod9kg7lgUTHfT84_XogkmPZfQ";
+        const INTERRUPT_COMMAND = "wait";
 
+        // --- DOM ELEMENTS ---
+        const UIElements = {
+            recordButton: document.getElementById('recordButton'),
+            recordButtonText: document.getElementById('recordButtonText'),
+            statusMessage: document.getElementById('statusMessage'),
+            recordingStatus: document.getElementById('recording-status'),
+            recordingStatusText: document.getElementById('recording-status-text'),
+            conversationDiv: document.getElementById('conversation'),
+            aiNotesDiv: document.getElementById('aiNotes'),
+            todoListDiv: document.getElementById('todoList'),
+            copyToDoListButton: document.getElementById('copyToDoListButton'),
+            copyStatus: document.getElementById('copyStatus'),
+        };
 
-        const recordButton = document.getElementById('recordButton');
-        const recordButtonText = document.getElementById('recordButtonText');
-        const micIcon = document.getElementById('mic-icon');
-        const recordingStatus = document.getElementById('recording-status');
-        const conversationDiv = document.getElementById('conversation');
-        const aiNotesDiv = document.getElementById('aiNotes');
-        const todoListDiv = document.getElementById('todoList');
-        const aiLoading = document.getElementById('ai-loading');
-        const statusMessage = document.getElementById('statusMessage');
-        const copyToDoListButton = document.getElementById('copyToDoListButton');
-        const copyStatus = document.getElementById('copyStatus');
-
-        let sessionActive = false;
-        let recognition;
+        // --- STATE MANAGEMENT ---
+        let state = 'IDLE'; // IDLE, LISTENING, PROCESSING, SPEAKING
         let conversationHistory = [];
-        let currentSpeech = null; // To hold the current TTS audio object
-        let audioCtx; // To hold the audio context
+        let currentSpeech = null;
+        let audioCtx;
+        let recognition;
         
-        // Check for browser support
-        if ('webkitSpeechRecognition' in window) {
+        // --- STATE MACHINE & UI UPDATES ---
+        function setState(newState) {
+            if (state === newState) return;
+            state = newState;
+            console.log(`State changed to: ${state}`);
+            updateUIForState();
+        }
+
+        function updateUIForState() {
+            const isIdle = state === 'IDLE';
+            const isListening = state === 'LISTENING';
+            const isProcessing = state === 'PROCESSING';
+            const isSpeaking = state === 'SPEAKING';
+
+            UIElements.recordButtonText.textContent = isIdle ? 'Start Conversation' : 'End Conversation';
+            UIElements.recordButton.disabled = isProcessing;
+
+            if (isListening || isProcessing || isSpeaking) {
+                UIElements.recordingStatus.classList.remove('hidden');
+                UIElements.recordingStatus.classList.add('flex');
+            } else {
+                UIElements.recordingStatus.classList.add('hidden');
+            }
+
+            if (isListening) UIElements.recordingStatusText.textContent = 'Listening...';
+            if (isProcessing) UIElements.recordingStatusText.textContent = 'Thinking...';
+            if (isSpeaking) UIElements.recordingStatusText.textContent = 'Jennifer is speaking...';
+        }
+
+        // --- SPEECH RECOGNITION SETUP ---
+        function initializeSpeechRecognition() {
+            if (!('webkitSpeechRecognition' in window)) {
+                UIElements.recordButton.disabled = true;
+                UIElements.recordButtonText.textContent = 'Not Supported';
+                UIElements.statusMessage.textContent = 'Speech recognition is not supported in this browser.';
+                return;
+            }
+
             recognition = new webkitSpeechRecognition();
-            recognition.continuous = false; // Process speech after a pause
-            recognition.interimResults = false; // We only need the final result
+            recognition.continuous = true;
+            recognition.interimResults = true;
             recognition.lang = 'en-US';
 
-            recognition.onstart = () => {
-                recordingStatus.classList.remove('hidden');
-            };
-            
-            recognition.onresult = (event) => {
-                const transcript = event.results[event.results.length - 1][0].transcript.trim();
-
-                if (transcript) {
-                    if (conversationDiv.querySelector('.text-gray-400')) {
-                        conversationDiv.innerHTML = ''; // Clear initial message
-                    }
-                    const userMessage = document.createElement('p');
-                    userMessage.innerHTML = `<span class="font-semibold text-indigo-600">You:</span> ${transcript}`;
-                    conversationDiv.appendChild(userMessage);
-                    conversationDiv.scrollTop = conversationDiv.scrollHeight;
-                    
-                    conversationHistory.push({ role: "user", parts: [{ text: transcript }] });
-
-                    getAIAssistance("Respond conversationally, continuing the thread. Keep it brief.", false);
-                }
-            };
-
+            recognition.onresult = handleRecognitionResult;
             recognition.onend = () => {
-                recordingStatus.classList.add('hidden');
-                // The loop is now handled by the TTS onended event, so we don't restart here
-            };
-
-            recognition.onerror = (event) => {
-                console.error("Speech recognition error:", event.error);
-                if (event.error === 'not-allowed') {
-                    statusMessage.textContent = 'Microphone access was denied.';
-                } else if (event.error !== 'no-speech') {
-                     statusMessage.textContent = 'Sorry, I\'m having trouble hearing.';
-                     setTimeout(() => statusMessage.textContent = '', 4000);
-                } else if (event.error === 'no-speech') {
-                     console.log("No speech detected, waiting for user to speak.");
+                if (state !== 'IDLE' && state !== 'PROCESSING') {
+                   startListening();
                 }
             };
-        } else {
-            recordButton.disabled = true;
-            recordButtonText.textContent = 'Not Supported';
-            statusMessage.textContent = 'Speech recognition is not supported in this browser. Please try Chrome.';
+            recognition.onerror = (event) => {
+                if (event.error !== 'no-speech') console.error("Speech recognition error:", event.error);
+            };
         }
 
-        recordButton.addEventListener('click', () => {
-            if (apiKey === "PASTE_YOUR_KEY_HERE") {
-                statusMessage.textContent = "API Key is missing in index.html";
+        function handleRecognitionResult(event) {
+            let interim_transcript = '';
+            let final_transcript = '';
+
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) final_transcript += event.results[i][0].transcript;
+                else interim_transcript += event.results[i][0].transcript;
+            }
+
+            if (state === 'SPEAKING' && interim_transcript.toLowerCase().includes(INTERRUPT_COMMAND)) {
+                if (currentSpeech) currentSpeech.pause();
+                recognition.stop();
                 return;
             }
-            if (sessionActive) {
-                // User clicks "End Conversation"
-                sessionActive = false;
-                if (currentSpeech) {
-                    currentSpeech.pause();
-                }
+            
+            if (state === 'LISTENING' && final_transcript.trim()) {
                 recognition.stop();
-                recordButtonText.textContent = 'Start Conversation';
-                recordingStatus.classList.add('hidden');
+                processUserSpeech(final_transcript.trim());
+            }
+        }
+        
+        // --- CORE LOGIC ---
+        function startListening() {
+            if (state !== 'LISTENING') {
+                 setState('LISTENING');
+                 try { recognition.start(); } catch (e) {}
+            }
+        }
 
-                if (conversationHistory.length > 0) {
-                    getAIAssistance("Based on our entire conversation, generate a comprehensive and updated to-do list.", true);
-                }
-
+        async function processUserSpeech(text) {
+            setState('PROCESSING');
+            addToConversationLog('You', text);
+            conversationHistory.push({ role: "user", parts: [{ text }] });
+            const aiResponse = await getAIAssistance("Respond conversationally, continuing the thread. Keep it brief.", false);
+            if (aiResponse) {
+                addToConversationLog('Jennifer', aiResponse.text, true);
+                conversationHistory.push({ role: "model", parts: [{ text: aiResponse.text }] });
+                await speak(aiResponse.audioData);
             } else {
-                // User clicks "Start Conversation"
-                sessionActive = true;
-                recordButtonText.textContent = 'End Conversation';
+                startListening();
+            }
+        }
+        
+        async function endConversation() {
+            setState('IDLE');
+            if (currentSpeech) currentSpeech.pause();
+            recognition.stop();
+            
+            if (conversationHistory.length > 0) {
+                setState('PROCESSING');
+                const todoResponse = await getAIAssistance("From our entire conversation, extract only the specific tasks and action items that I have mentioned. Compile these into a concise to-do list.", true);
+                if (todoResponse) {
+                    UIElements.todoListDiv.innerHTML = markdownListToHtml(todoResponse.text);
+                    UIElements.copyToDoListButton.classList.remove('hidden');
+                    await speak(todoResponse.audioData);
+                }
+                setState('IDLE');
+            }
+            conversationHistory = [];
+        }
+
+        // --- EVENT LISTENERS ---
+        UIElements.recordButton.addEventListener('click', async () => {
+            if (state === 'IDLE') {
+                const permissionGranted = await checkPermissionsAndInitAudio();
+                if (permissionGranted) {
+                    if (conversationHistory.length === 0) resetUI();
+                    startListening();
+                }
+            } else {
+                endConversation();
+            }
+        });
+
+        // --- HELPERS & API CALLS ---
+        async function speak(audioData) {
+            if (!audioData) return Promise.resolve();
+            
+            return new Promise((resolve) => {
+                setState('SPEAKING');
+                const wavBlob = pcmToWav(new Int16Array(base64ToArrayBuffer(audioData.data)), audioData.sampleRate);
+                currentSpeech = new Audio(URL.createObjectURL(wavBlob));
+                currentSpeech.onended = () => {
+                    currentSpeech = null;
+                    resolve();
+                };
+                currentSpeech.onerror = (e) => {
+                    currentSpeech = null;
+                    console.error("Audio playback error:", e);
+                    resolve(); 
+                }
+                currentSpeech.play();
+            });
+        }
+
+        async function getAIAssistance(prompt, isTodoList) {
+            const systemPrompt = "You are Jennifer, a professional and efficient AI co-pilot. Your primary role is to help the user capture and organize their thoughts by asking concise, clarifying questions. Your goal is to extract actionable tasks from the user's speech. Avoid overly agreeable phrases. If the user's phrasing presents an obvious opportunity for a pun, you may make one in a clever but still professional manner. IMPORTANT: When asked to generate a to-do list, your text response MUST contain ONLY the actionable to-do items explicitly mentioned by the user, formatted as a markdown list (e.g., - Mow the lawn). Do not add items that weren't mentioned. Do NOT include any other conversational text in the written to-do list response.";
+            let contentForAPI = [...conversationHistory];
+            contentForAPI.push({ role: "user", parts: [{ text: prompt }] });
+            
+            try {
+                // Text generation
+                const textApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                const textResponse = await fetch(textApiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: contentForAPI, systemInstruction: { parts: [{ text: systemPrompt }] } })
+                });
+                if (!textResponse.ok) throw new Error(`Text API failed: ${textResponse.status}`);
+                const textResult = await textResponse.json();
+                const generatedText = textResult.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!generatedText) throw new Error("No text generated.");
+
+                // TTS generation
+                const ttsText = isTodoList ? "Got it. I've updated your to-do list for you." : generatedText;
+                const ttsApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
                 
-                // --- FIX FOR MOBILE AUDIO ---
-                // Initialize and resume the AudioContext on the first user tap.
+                const ttsPayload = {
+                    contents: [{ parts: [{ text: ttsText }] }],
+                    generationConfig: {
+                        responseModalities: ["AUDIO"],
+                        speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Erinome" } } }
+                    },
+                    model: "gemini-2.5-flash-preview-tts"
+                };
+                const ttsResponse = await fetch(ttsApiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(ttsPayload)
+                });
+                if (!ttsResponse.ok) {
+                     const errorBody = await ttsResponse.text();
+                     throw new Error(`TTS API failed: ${ttsResponse.status}. Body: ${errorBody}`);
+                }
+                const ttsResult = await ttsResponse.json();
+                const audioContent = ttsResult.candidates?.[0]?.content?.parts?.[0]?.inlineData;
+                if (!audioContent) throw new Error("No audio data in TTS response.");
+                
+                const sampleRate = parseInt(audioContent.mimeType.match(/rate=(\d+)/)[1], 10);
+                
+                return { text: generatedText, audioData: { data: audioContent.data, sampleRate: sampleRate } };
+
+            } catch (error) {
+                console.error("Error in getAIAssistance:", error.message);
+                if (error.message.includes("429")) {
+                    UIElements.statusMessage.textContent = "Free daily usage limit reached. Please try again tomorrow.";
+                } else {
+                    UIElements.statusMessage.textContent = "Sorry, I'm having trouble responding.";
+                }
+                setTimeout(() => UIElements.statusMessage.textContent = '', 5000);
+                return null;
+            }
+        }
+
+        async function checkPermissionsAndInitAudio() {
+            if (apiKey === "PASTE_YOUR_KEY_HERE" || !apiKey) {
+                UIElements.statusMessage.textContent = "API Key is missing in index.html";
+                return false;
+            }
+            try {
+                const permissionStatus = await navigator.permissions.query({ name: 'microphone' });
+                if (permissionStatus.state === 'denied') {
+                    UIElements.statusMessage.textContent = 'Microphone access is blocked. Please enable it in browser settings.';
+                    return false;
+                }
                 if (!audioCtx) {
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const buffer = audioCtx.createBuffer(1, 1, 22050);
+                    const source = audioCtx.createBufferSource();
+                    source.buffer = buffer;
+                    source.connect(audioCtx.destination);
+                    source.start(0);
                 }
-                if (audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
-
-                if (conversationHistory.length === 0) {
-                    conversationDiv.innerHTML = '';
-                    aiNotesDiv.innerHTML = '';
-                    todoListDiv.innerHTML = '<p class="text-gray-400">Your to-do list will appear here after the conversation.</p>';
-                    copyToDoListButton.classList.add('hidden');
-                    copyStatus.textContent = '';
-                }
-                recognition.start();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                return true;
+            } catch (error) {
+                console.error("Permissions check failed:", error);
+                return true;
             }
-        });
+        }
+        
+        function resetUI() {
+            UIElements.conversationDiv.innerHTML = '<p class="text-gray-400">Your conversation will appear here...</p>';
+            UIElements.aiNotesDiv.innerHTML = `<p class="text-gray-400">Jennifer's questions will appear here...</p>`;
+            UIElements.todoListDiv.innerHTML = '<p class="text-gray-400">Your to-do list will appear here.</p>';
+            UIElements.copyToDoListButton.classList.add('hidden');
+            UIElements.copyStatus.textContent = '';
+        }
+        
+        function addToConversationLog(speaker, text, isAI = false) {
+             const div = isAI ? UIElements.aiNotesDiv : UIElements.conversationDiv;
+             if (div.querySelector('.text-gray-400')) div.innerHTML = '';
+             const p = document.createElement('p');
+             const color = isAI ? 'text-purple-600' : 'text-indigo-600';
+             p.innerHTML = `<span class="font-semibold ${color}">${speaker}:</span> ${text}`;
+             div.appendChild(p);
+             div.scrollTop = div.scrollHeight;
+        }
 
-        copyToDoListButton.addEventListener('click', () => {
-            const todoItems = Array.from(todoListDiv.querySelectorAll('li'));
-            if (todoItems.length === 0) {
-                copyStatus.textContent = 'Nothing to copy.';
-                setTimeout(() => { copyStatus.textContent = '' }, 3000);
-                return;
-            }
-
-            const textToCopy = todoItems.map(item => `• ${item.textContent}`).join('\n');
-
-            const textArea = document.createElement('textarea');
-            textArea.value = textToCopy;
-            document.body.appendChild(textArea);
-            textArea.select();
-            try {
-                document.execCommand('copy');
-                copyStatus.textContent = '✅ Copied to clipboard!';
-            } catch (err) {
-                copyStatus.textContent = '❌ Failed to copy.';
-                console.error('Failed to copy text: ', err);
-            }
-            document.body.removeChild(textArea);
-
-            setTimeout(() => { copyStatus.textContent = '' }, 3000);
-        });
+        // --- UTILITIES ---
+        function markdownListToHtml(text) {
+            if (text.includes('<li>')) return text;
+            const lines = text.trim().split('\n');
+            let html = '<ul class="list-disc list-inside space-y-1 text-gray-700">';
+            lines.forEach(line => {
+                const trimmedLine = line.trim();
+                const match = trimmedLine.match(/^[\*\-]\s+(.*)/);
+                if (match) html += `<li>${match[1]}</li>`;
+                else if (trimmedLine) html += `<li>${trimmedLine}</li>`;
+            });
+            return html + '</ul>';
+        }
 
         function base64ToArrayBuffer(base64) {
             const binaryString = window.atob(base64);
             const len = binaryString.length;
             const bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
-            }
+            for (let i = 0; i < len; i++) bytes[i] = binaryString.charCodeAt(i);
             return bytes.buffer;
         }
 
         function pcmToWav(pcmData, sampleRate) {
-            const numChannels = 1;
-            const bitsPerSample = 16;
+            const numChannels = 1, bitsPerSample = 16;
             const byteRate = sampleRate * numChannels * bitsPerSample / 8;
             const blockAlign = numChannels * bitsPerSample / 8;
             const dataSize = pcmData.length * 2;
             const buffer = new ArrayBuffer(44 + dataSize);
             const view = new DataView(buffer);
-
-            view.setUint32(0, 0x52494646, false);
+            view.setUint32(0, 0x52494646, false); // "RIFF"
             view.setUint32(4, 36 + dataSize, true);
-            view.setUint32(8, 0x57415645, false);
-            view.setUint32(12, 0x666d7420, false);
+            view.setUint32(8, 0x57415645, false); // "WAVE"
+            view.setUint32(12, 0x666d7420, false); // "fmt "
             view.setUint32(16, 16, true);
             view.setUint16(20, 1, true);
             view.setUint16(22, numChannels, true);
@@ -343,160 +480,40 @@
             view.setUint32(28, byteRate, true);
             view.setUint16(32, blockAlign, true);
             view.setUint16(34, bitsPerSample, true);
-            view.setUint32(36, 0x64617461, false);
+            view.setUint32(36, 0x64617461, false); // "data"
             view.setUint32(40, dataSize, true);
-
-            for (let i = 0; i < pcmData.length; i++) {
-                view.setInt16(44 + i * 2, pcmData[i], true);
-            }
-
+            for (let i = 0; i < pcmData.length; i++) view.setInt16(44 + i * 2, pcmData[i], true);
             return new Blob([view], { type: 'audio/wav' });
         }
-
-        function markdownListToHtml(text) {
-            if (text.includes('<li>')) {
-                return text;
+        
+        copyToDoListButton.addEventListener('click', () => {
+            const todoItems = Array.from(UIElements.todoListDiv.querySelectorAll('li'));
+            if (todoItems.length === 0) {
+                UIElements.copyStatus.textContent = 'Nothing to copy.';
+                setTimeout(() => { UIElements.copyStatus.textContent = '' }, 3000);
+                return;
             }
-            const lines = text.trim().split('\n');
-            let html = '<ul class="list-disc list-inside space-y-1 text-gray-700">';
-            for (const line of lines) {
-                const trimmedLine = line.trim();
-                const match = trimmedLine.match(/^[\*\-]\s+(.*)/);
-                if (match) {
-                    html += `<li>${match[1]}</li>`;
-                } else if (trimmedLine) {
-                    html += `<li>${trimmedLine}</li>`;
-                }
-            }
-            html += '</ul>';
-            return html;
-        }
-
-        function getAndPlayTTS(text) {
-             return new Promise((resolve, reject) => {
-                const cleanedText = text.replace(/[*_`]/g, '');
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
-
-                const payload = {
-                    contents: [{ parts: [{ text: cleanedText }] }],
-                    generationConfig: {
-                        responseModalities: ["AUDIO"],
-                        speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Erinome" } } }
-                    },
-                    model: "gemini-2.5-flash-preview-tts"
-                };
-                
-                fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                })
-                .then(response => {
-                    if (!response.ok) throw new Error(`TTS API call failed with status: ${response.status}`);
-                    return response.json();
-                })
-                .then(result => {
-                    const part = result?.candidates?.[0]?.content?.parts?.[0];
-                    const audioData = part?.inlineData?.data;
-                    const mimeType = part?.inlineData?.mimeType;
-
-                    if (audioData && mimeType && mimeType.startsWith("audio/")) {
-                        const sampleRateMatch = mimeType.match(/rate=(\d+)/);
-                        if (!sampleRateMatch) throw new Error("Sample rate not found in mimeType");
-                        
-                        const sampleRate = parseInt(sampleRateMatch[1], 10);
-                        const pcmData = base64ToArrayBuffer(audioData);
-                        const pcm16 = new Int16Array(pcmData);
-                        const wavBlob = pcmToWav(pcm16, sampleRate);
-                        const audioUrl = URL.createObjectURL(wavBlob);
-                        
-                        currentSpeech = new Audio(audioUrl);
-                        currentSpeech.onended = () => {
-                            currentSpeech = null;
-                            if (sessionActive) {
-                                recognition.start(); // Start listening ONLY after TTS is done
-                            }
-                            resolve();
-                        };
-                        currentSpeech.play().catch(e => reject(e));
-                    } else {
-                        throw new Error("Invalid audio data in TTS response.");
-                    }
-                })
-                .catch(error => {
-                    console.error("Error with TTS:", error);
-                    statusMessage.textContent = "Sorry, I'm having trouble responding.";
-                    setTimeout(() => statusMessage.textContent = '', 4000);
-                    // If TTS fails, we must still restart the loop if active
-                    if (sessionActive) {
-                       recognition.start();
-                    }
-                    reject(error);
-                });
-            });
-        }
-
-        async function getAIAssistance(prompt, isTodoList) {
-            aiLoading.classList.remove('hidden');
-            recordButton.disabled = true;
-
-            const systemPrompt = "You are Jennifer, a professional and efficient AI co-pilot. Your primary role is to listen, take notes, and ask clarifying questions to help the user organize their thoughts. Keep your conversational style concise and to the point. However, if the user's phrasing presents a very obvious opportunity for a pun, you may make one in a clever but still professional manner. Otherwise, avoid humor. IMPORTANT: When asked to generate a to-do list, your text response MUST contain ONLY the list items in markdown format (e.g., - Mow the lawn). Do NOT include any other conversational text in the written to-do list response.";
-            
-            let contentForAPI = [...conversationHistory];
-            contentForAPI.push({ role: "user", parts: [{ text: prompt }] });
-            
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-            
+            const textToCopy = todoItems.map(item => `• ${item.textContent}`).join('\n');
+            const textArea = document.createElement('textarea');
+            textArea.value = textToCopy;
+            document.body.appendChild(textArea);
+            textArea.select();
             try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: contentForAPI, systemInstruction: { parts: [{ text: systemPrompt }] } })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`API call failed with status: ${response.status}`);
-                }
-
-                const result = await response.json();
-                const candidate = result.candidates?.[0];
-
-                if (candidate && candidate.content?.parts?.[0]?.text) {
-                    const text = candidate.content.parts[0].text;
-                    if (isTodoList) {
-                        if (todoListDiv.querySelector('.text-gray-400')) {
-                             todoListDiv.innerHTML = '';
-                        }
-                        const htmlList = markdownListToHtml(text);
-                        todoListDiv.innerHTML = htmlList; 
-                        copyToDoListButton.classList.remove('hidden');
-                        await getAndPlayTTS("Got it. I've updated your to-do list for you.");
-                    } else {
-                        if (aiNotesDiv.querySelector('.text-gray-400')) {
-                             aiNotesDiv.innerHTML = '';
-                        }
-                        aiNotesDiv.innerHTML = `<p><span class="font-semibold text-purple-600">Jennifer:</span> ${text}</p>`;
-                         conversationHistory.push({ role: "model", parts: [{ text: text }] });
-                         await getAndPlayTTS(text);
-                    }
-                } else {
-                    throw new Error("Invalid response structure from API.");
-                }
-
-            } catch (error) {
-                console.error("Error calling Gemini API:", error);
-                statusMessage.textContent = "Sorry, I'm having trouble responding.";
-                setTimeout(() => statusMessage.textContent = '', 4000);
-                 if (sessionActive) {
-                    recognition.start(); // Restart loop even on error
-                }
-            } finally {
-                aiLoading.classList.add('hidden');
-                recordButton.disabled = false;
+                document.execCommand('copy');
+                UIElements.copyStatus.textContent = '✅ Copied to clipboard!';
+            } catch (err) {
+                UIElements.copyStatus.textContent = '❌ Failed to copy.';
+                console.error('Failed to copy text: ', err);
             }
-        }
+            document.body.removeChild(textArea);
+            setTimeout(() => { UIElements.copyStatus.textContent = '' }, 3000);
+        });
+
+        // --- INITIALIZATION ---
+        initializeSpeechRecognition();
+        setState('IDLE');
+
     </script>
 </body>
 </html>
-
 
