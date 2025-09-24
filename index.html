@@ -279,8 +279,9 @@
                 addToConversationLog('Jennifer', aiResponse.text, true);
                 conversationHistory.push({ role: "model", parts: [{ text: aiResponse.text }] });
                 await speak(aiResponse.audioData);
+                startListening(); // Re-start listening after Jennifer is done
             } else {
-                startListening();
+                startListening(); // Also re-start listening if AI fails
             }
         }
         
